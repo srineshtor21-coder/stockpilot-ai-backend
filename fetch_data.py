@@ -1,18 +1,3 @@
-"""
-StockPilot AI - Session 1: Data Pipeline
-------------------------------------------
-Fetches financial data for a given stock ticker from Financial Modeling Prep (FMP)
-and returns a clean, structured JSON object ready for the ML models in later sessions.
-
-USAGE:
-    export FMP_API_KEY="your-key-here"
-    python fetch_data.py AAPL
-
-OUTPUT:
-    Prints a JSON object with company profile, key ratios, growth metrics,
-    and cash flow data - the raw inputs for the Financial Health / Risk models.
-"""
-
 import os
 import sys
 import json
