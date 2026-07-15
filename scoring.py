@@ -1,26 +1,3 @@
-"""
-StockPilot AI - Session 2: Financial Health & Risk Scoring
--------------------------------------------------------------
-Takes the JSON snapshot produced by fetch_data.py (Session 1) and computes:
-  1. Financial Health Score (0-100) - how strong the business fundamentals are
-  2. Risk Level (Low / Moderate / High) - how risky the stock is to hold
-
-This is a transparent, rules-based weighted scoring system rather than a
-"black box" ML model. That's intentional: it's explainable (you can show
-exactly why a company scored the way it did), and it doesn't require a
-large labeled training dataset to get started. A trained ML model (e.g.
-XGBoost) can be swapped in later using this same feature set once you've
-collected enough historical data to create real training labels.
-
-USAGE:
-    from fetch_data import get_financial_snapshot
-    from scoring import score_company
-
-    snapshot = get_financial_snapshot("AAPL")
-    result = score_company(snapshot)
-    print(result)
-"""
-
 import json
 
 
