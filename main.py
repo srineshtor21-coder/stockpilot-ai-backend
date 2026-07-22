@@ -1,21 +1,3 @@
-"""
-StockPilot AI - Session 4: FastAPI Backend
-------------------------------------------------
-Combines fetch_data.py + scoring.py + sentiment.py into one API that your
-Lovable frontend can call.
-
-USAGE (local testing):
-    pip install fastapi uvicorn
-    uvicorn main:app --reload
-
-Then visit http://127.0.0.1:8000/docs to test it interactively, or call:
-    http://127.0.0.1:8000/analyze?ticker=AAPL
-
-DEPLOYMENT:
-    This is designed to run on Render/Railway using:
-        uvicorn main:app --host 0.0.0.0 --port $PORT
-"""
-
 import time
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -112,6 +94,8 @@ def analyze(ticker: str = Query(..., description="Stock ticker, e.g. AAPL")):
             "peRatio": financial_data.get("peRatio"),
             "pbRatio": financial_data.get("pbRatio"),
             "beta": financial_data.get("beta"),
+            "marketCap": financial_data.get("marketCap"),
+            "debtToEquity": financial_data.get("debtToEquity"),
         },
     }
 
