@@ -107,7 +107,12 @@ def score_risk(data: dict) -> dict:
     current_ratio = _safe(data.get("currentRatio"), default=1)
     quick_ratio = _safe(data.get("quickRatio"), default=1)
     beta = _safe(data.get("beta"), default=1)
-    interest_coverage = _safe(data.get("interestCoverage"), default=5)
+    # Some data providers return 0 or omit this field entirely when it's not
+    # meaningfully calculable (e.g. near-zero interest expense) rather than
+    # the company actually having terrible coverage. Treat 0/missing as
+    # "unknown" (skip the check) instead of "critically bad."
+    interest_coverage = data.get("interestCoverage")
+    has_interest_coverage_data = isinstance(interest_coverage, (int, float)) and interest_coverage != 0
 
     risk_points = 0
     flags = []
@@ -141,11 +146,13 @@ def score_risk(data: dict) -> dict:
         flags.append("Above-average volatility")
 
     # Interest coverage risk (can the company service its debt from earnings?)
-    if interest_coverage < 2:
-        risk_points += 20
-        flags.append("Low interest coverage - earnings barely cover debt payments")
-    elif interest_coverage < 5:
-        risk_points += 5
+    # Only evaluate this if we actually have usable data for it.
+    if has_interest_coverage_data:
+        if interest_coverage < 2:
+            risk_points += 20
+            flags.append("Low interest coverage - earnings barely cover debt payments")
+        elif interest_coverage < 5:
+            risk_points += 5
 
     risk_points = int(_clamp(risk_points))
 

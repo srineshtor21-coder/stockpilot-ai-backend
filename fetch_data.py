@@ -3,7 +3,13 @@ import sys
 import json
 import requests
 
-BASE_URL = "https://financialmodelingprep.com/api/v3"
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # reads .env in the current folder and loads it into os.environ
+except ImportError:
+    pass  # if python-dotenv isn't installed, fall back to manually exported vars
+
+BASE_URL = "https://financialmodelingprep.com/stable"
 
 
 def get_api_key():
@@ -17,9 +23,10 @@ def get_api_key():
 
 
 def fetch_json(endpoint, ticker, api_key, params=None):
-    """Generic helper to hit an FMP endpoint and return parsed JSON."""
-    url = f"{BASE_URL}/{endpoint}/{ticker}"
+    """Generic helper to hit an FMP /stable/ endpoint and return parsed JSON."""
+    url = f"{BASE_URL}/{endpoint}"
     query = params or {}
+    query["symbol"] = ticker
     query["apikey"] = api_key
     resp = requests.get(url, params=query, timeout=15)
     resp.raise_for_status()
@@ -58,24 +65,24 @@ def get_financial_snapshot(ticker: str) -> dict:
         "grossProfitGrowth": growth.get("grossProfitGrowth"),
 
         # Profitability ratios - used by Financial Health model
-        "grossMargin": ratios.get("grossProfitMarginTTM") or ratios.get("grossProfitMargin"),
-        "operatingMargin": ratios.get("operatingProfitMarginTTM") or ratios.get("operatingProfitMargin"),
-        "netMargin": ratios.get("netProfitMarginTTM") or ratios.get("netProfitMargin"),
-        "returnOnEquity": ratios.get("returnOnEquityTTM") or ratios.get("returnOnEquity"),
-        "returnOnAssets": ratios.get("returnOnAssetsTTM") or ratios.get("returnOnAssets"),
+        "grossMargin": ratios.get("grossProfitMargin"),
+        "operatingMargin": ratios.get("operatingProfitMargin"),
+        "netMargin": ratios.get("netProfitMargin"),
+        "returnOnEquity": key_metrics.get("returnOnEquity"),
+        "returnOnAssets": key_metrics.get("returnOnAssets"),
 
         # Debt / liquidity - used by Risk model
-        "debtToEquity": ratios.get("debtEquityRatioTTM") or ratios.get("debtEquityRatio"),
-        "currentRatio": ratios.get("currentRatioTTM") or ratios.get("currentRatio"),
-        "quickRatio": ratios.get("quickRatioTTM") or ratios.get("quickRatio"),
-        "interestCoverage": ratios.get("interestCoverageTTM") or ratios.get("interestCoverage"),
+        "debtToEquity": ratios.get("debtToEquityRatio"),
+        "currentRatio": ratios.get("currentRatio"),
+        "quickRatio": ratios.get("quickRatio"),
+        "interestCoverage": ratios.get("interestCoverageRatio"),  # may be null - not confirmed in this API version
 
         # Cash flow - used by both models
         "freeCashFlow": cashflow.get("freeCashFlow"),
         "operatingCashFlow": cashflow.get("operatingCashFlow"),
 
         # Valuation - used by report generator
-        "peRatio": ratios.get("priceEarningsRatioTTM") or ratios.get("priceEarningsRatio"),
+        "peRatio": ratios.get("priceToEarningsRatio"),
         "pbRatio": ratios.get("priceToBookRatioTTM") or ratios.get("priceToBookRatio"),
 
         # Extra context
@@ -95,6 +102,15 @@ if __name__ == "__main__":
     try:
         data = get_financial_snapshot(ticker_arg)
         print(json.dumps(data, indent=2))
+
+        # Quick integration test: feed this real data into the scoring model
+        try:
+            from scoring import score_company
+            print("\n--- SCORING RESULT ---")
+            print(json.dumps(score_company(data), indent=2))
+        except ImportError:
+            pass  # scoring.py not in this folder yet - skip
+
     except EnvironmentError as e:
         print(f"Error: {e}")
     except requests.exceptions.HTTPError as e:
