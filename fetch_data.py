@@ -93,6 +93,31 @@ def get_financial_snapshot(ticker: str) -> dict:
     return snapshot
 
 
+def get_news_headlines(ticker: str, limit: int = 10) -> list:
+    """
+    Fetch recent news headlines for a ticker - used as input to the
+    FinBERT sentiment model (sentiment.py).
+    Returns a plain list of headline strings.
+    """
+    api_key = get_api_key()
+    url = f"{BASE_URL}/news/stock"
+    try:
+        resp = requests.get(
+            url,
+            params={"symbols": ticker, "limit": limit, "apikey": api_key},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        articles = resp.json()
+        if isinstance(articles, list):
+            return [a.get("title") for a in articles if a.get("title")]
+        return []
+    except requests.exceptions.HTTPError:
+        # If the news endpoint isn't available on this plan, fail gracefully
+        # rather than breaking the whole pipeline.
+        return []
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python fetch_data.py TICKER")
