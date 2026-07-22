@@ -54,7 +54,7 @@ def get_financial_snapshot(ticker: str) -> dict:
         "companyName": profile.get("companyName"),
         "sector": profile.get("sector"),
         "industry": profile.get("industry"),
-        "marketCap": profile.get("mktCap"),
+        "marketCap": profile.get("marketCap"),
         "price": profile.get("price"),
         "beta": profile.get("beta"),
         "description": profile.get("description"),
