@@ -1,0 +1,6 @@
+# StockPilot AI - Environment Variables
+# ----------------------------------------
+# Fill in your real API key below, replacing the placeholder text.
+# NEVER commit this file to GitHub - it's already listed in .gitignore.
+
+FMP_API_KEY=paste_your_new_key_here
